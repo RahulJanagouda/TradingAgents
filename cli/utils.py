@@ -26,8 +26,11 @@ CRYPTO_SUFFIXES = ("-USD", "-USDT", "-USDC", "-BTC", "-ETH")
 
 def get_ticker() -> str:
     """Prompt the user to enter a ticker symbol."""
+    from tradingagents.default_config import DEFAULT_CONFIG
+    default_ticker = DEFAULT_CONFIG.get("benchmark_ticker") or "SPY"
     ticker = questionary.text(
         f"Enter the exact ticker symbol to analyze ({TICKER_INPUT_EXAMPLES}):",
+        default=default_ticker,
         validate=lambda x: len(x.strip()) > 0 or "Please enter a valid ticker symbol.",
         style=questionary.Style(
             [
@@ -69,21 +72,20 @@ def filter_analysts_for_asset_type(
 
 
 def get_analysis_date() -> str:
-    """Prompt the user to enter a date in YYYY-MM-DD format."""
-    import re
-    from datetime import datetime
+    """Prompt the user to enter analysis date."""
+    import datetime
+    default_date = datetime.datetime.now().strftime("%Y-%m-%d")
 
-    def validate_date(date_str: str) -> bool:
-        if not re.match(r"^\d{4}-\d{2}-\d{2}$", date_str):
-            return False
+    def validate_date(date_str):
         try:
-            datetime.strptime(date_str, "%Y-%m-%d")
+            datetime.datetime.strptime(date_str, "%Y-%m-%d")
             return True
         except ValueError:
             return False
 
     date = questionary.text(
         "Enter the analysis date (YYYY-MM-DD):",
+        default=default_date,
         validate=lambda x: validate_date(x.strip())
         or "Please enter a valid date in YYYY-MM-DD format.",
         style=questionary.Style(
@@ -110,7 +112,7 @@ def select_analysts(asset_type: AssetType = AssetType.STOCK) -> List[AnalystType
     choices = questionary.checkbox(
         "Select Your [Analysts Team]:",
         choices=[
-            questionary.Choice(display, value=value)
+            questionary.Choice(display, value=value, checked=True)
             for display, value in ANALYST_ORDER
             if value in available_analysts
         ],
@@ -143,11 +145,15 @@ def select_research_depth() -> int:
         ("Deep - Comprehensive research, in depth debate and strategy discussion", 5),
     ]
 
+    from tradingagents.default_config import DEFAULT_CONFIG
+    default_val = DEFAULT_CONFIG.get("max_debate_rounds", 1)
+
     choice = questionary.select(
         "Select Your [Research Depth]:",
         choices=[
             questionary.Choice(display, value=value) for display, value in DEPTH_OPTIONS
         ],
+        default=default_val,
         instruction="\n- Use arrow keys to navigate\n- Press Enter to select",
         style=questionary.Style(
             [
@@ -224,12 +230,22 @@ def _select_model(provider: str, mode: str) -> str:
             validate=lambda x: len(x.strip()) > 0 or "Please enter a deployment name.",
         ).ask().strip()
 
+    from tradingagents.default_config import DEFAULT_CONFIG
+    default_key = "quick_think_llm" if mode == "quick" else "deep_think_llm"
+    default_val = DEFAULT_CONFIG.get(default_key)
+    
+    # Check if default_val is in the available choice values
+    options = get_model_options(provider, mode)
+    available_values = [value for _, value in options]
+    default_choice = default_val if default_val in available_values else None
+
     choice = questionary.select(
         f"Select Your [{mode.title()}-Thinking LLM Engine]:",
         choices=[
             questionary.Choice(display, value=value)
-            for display, value in get_model_options(provider, mode)
+            for display, value in options
         ],
+        default=default_choice,
         instruction="\n- Use arrow keys to navigate\n- Press Enter to select",
         style=questionary.Style(
             [
@@ -280,12 +296,21 @@ def select_llm_provider() -> tuple[str, str | None]:
         ("Ollama", "ollama", ollama_url),
     ]
 
+    from tradingagents.default_config import DEFAULT_CONFIG
+    default_provider = DEFAULT_CONFIG.get("llm_provider")
+    default_choice = None
+    for _, key, url in PROVIDERS:
+        if key == default_provider:
+            default_choice = (key, url)
+            break
+
     choice = questionary.select(
         "Select your LLM Provider:",
         choices=[
             questionary.Choice(display, value=(provider_key, url))
             for display, provider_key, url in PROVIDERS
         ],
+        default=default_choice,
         instruction="\n- Use arrow keys to navigate\n- Press Enter to select",
         style=questionary.Style(
             [
@@ -515,10 +540,11 @@ def ensure_api_key(provider: str) -> Optional[str]:
     os.environ[env_var] = key
     console.print(f"[green]Saved {env_var} to {env_path}[/green]")
     return key
-
-
 def ask_output_language() -> str:
     """Ask for report output language."""
+    from tradingagents.default_config import DEFAULT_CONFIG
+    default_lang = DEFAULT_CONFIG.get("output_language", "English")
+
     choice = questionary.select(
         "Select Output Language:",
         choices=[
@@ -535,6 +561,7 @@ def ask_output_language() -> str:
             questionary.Choice("Russian (Русский)", "Russian"),
             questionary.Choice("Custom language", "custom"),
         ],
+        default=default_lang,
         style=questionary.Style([
             ("selected", "fg:yellow noinherit"),
             ("highlighted", "fg:yellow noinherit"),
