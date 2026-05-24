@@ -378,7 +378,7 @@ def ask_gemini_thinking_config() -> str | None:
     return questionary.select(
         "Select Thinking Mode:",
         choices=[
-            questionary.Choice("Enable Thinking (recommended)", "high"),
+            questionary.Choice("Deep Thinking", "high"),
             questionary.Choice("Minimal/Disable Thinking", "minimal"),
         ],
         style=questionary.Style([

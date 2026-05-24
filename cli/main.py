@@ -1119,8 +1119,13 @@ def execute_analysis_flow(selections: dict, checkpoint: bool = False, auto_save:
     
     provider_lower = selections['llm_provider'].lower()
     if provider_lower == "google":
-        thinking_level = selections.get("google_thinking_level") or "Default"
-        config_summary += f"\n[bold]Gemini Thinking Mode:[/bold] {thinking_level.title()}"
+        thinking_level = selections.get("google_thinking_level")
+        thinking_map = {
+            "high": "Deep Thinking",
+            "minimal": "Minimal/Disable Thinking"
+        }
+        thinking_display = thinking_map.get(thinking_level, "Default")
+        config_summary += f"\n[bold]Gemini Thinking Mode:[/bold] {thinking_display}"
     elif provider_lower == "openai":
         reasoning_effort = selections.get("openai_reasoning_effort") or "Default"
         config_summary += f"\n[bold]OpenAI Reasoning Effort:[/bold] {reasoning_effort.title()}"
@@ -1153,8 +1158,13 @@ def execute_analysis_flow(selections: dict, checkpoint: bool = False, auto_save:
         message_buffer.add_message("System", f"Research Depth: {selections['research_depth']} rounds")
         
         if provider_lower == "google":
-            thinking_level = selections.get("google_thinking_level") or "Default"
-            message_buffer.add_message("System", f"Gemini Thinking Mode: {thinking_level.title()}")
+            thinking_level = selections.get("google_thinking_level")
+            thinking_map = {
+                "high": "Deep Thinking",
+                "minimal": "Minimal/Disable Thinking"
+            }
+            thinking_display = thinking_map.get(thinking_level, "Default")
+            message_buffer.add_message("System", f"Gemini Thinking Mode: {thinking_display}")
         elif provider_lower == "openai":
             reasoning_effort = selections.get("openai_reasoning_effort") or "Default"
             message_buffer.add_message("System", f"OpenAI Reasoning: {reasoning_effort.title()}")
