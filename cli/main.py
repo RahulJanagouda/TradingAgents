@@ -1022,7 +1022,7 @@ def get_default_selections(ticker: str) -> dict:
         "shallow_thinker": quick_thinker,
         "deep_thinker": deep_thinker,
         "asset_type": asset_type,
-        "google_thinking_level": DEFAULT_CONFIG.get("google_thinking_level"),
+        "google_thinking_level": DEFAULT_CONFIG.get("google_thinking_level") or "high",
         "openai_reasoning_effort": DEFAULT_CONFIG.get("openai_reasoning_effort"),
         "anthropic_effort": DEFAULT_CONFIG.get("anthropic_effort"),
     }
