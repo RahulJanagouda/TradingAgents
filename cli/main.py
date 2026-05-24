@@ -1107,6 +1107,24 @@ def execute_analysis_flow(selections: dict, checkpoint: bool = False, auto_save:
     message_buffer.add_tool_call = save_tool_call_decorator(message_buffer, "add_tool_call")
     message_buffer.update_report_section = save_report_section_decorator(message_buffer, "update_report_section")
 
+    # Print the active configuration summary in a beautiful Box
+    config_summary = f"[bold]Provider:[/bold] {selections['llm_provider'].upper()}\n"
+    config_summary += f"[bold]Quick-Thinking Model:[/bold] {selections['shallow_thinker']}\n"
+    config_summary += f"[bold]Deep-Thinking Model:[/bold] {selections['deep_thinker']}\n"
+    config_summary += f"[bold]Research Depth:[/bold] {selections['research_depth']} round(s)\n"
+    config_summary += f"[bold]Output Language:[/bold] {selections['output_language']}"
+    
+    config_box = Panel(
+        config_summary,
+        border_style="magenta",
+        padding=(1, 2),
+        title="[bold magenta]Active Configuration[/bold magenta]",
+        expand=False
+    )
+    console.print(config_box)
+    console.print()
+    time.sleep(1.5)
+
     layout = create_layout()
 
     with Live(layout, refresh_per_second=4) as live:
@@ -1115,6 +1133,10 @@ def execute_analysis_flow(selections: dict, checkpoint: bool = False, auto_save:
         message_buffer.add_message("System", f"Detected asset type: {selections['asset_type']}")
         message_buffer.add_message("System", f"Analysis date: {selections['analysis_date']}")
         message_buffer.add_message("System", f"Selected analysts: {', '.join(analyst.value for analyst in selections['analysts'])}")
+        message_buffer.add_message("System", f"LLM Provider: {selections['llm_provider'].upper()}")
+        message_buffer.add_message("System", f"Quick Model: {selections['shallow_thinker']}")
+        message_buffer.add_message("System", f"Deep Model: {selections['deep_thinker']}")
+        message_buffer.add_message("System", f"Research Depth: {selections['research_depth']} rounds")
         update_display(layout, stats_handler=stats_handler, start_time=start_time)
 
         first_analyst = get_initial_analyst_node(analyst_execution_plan)
