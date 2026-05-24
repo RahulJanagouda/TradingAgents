@@ -983,7 +983,7 @@ def get_default_selections(ticker: str) -> dict:
     
     # Pre-select all available analysts
     available_analysts = filter_analysts_for_asset_type(
-        [value for _, value in ANALYST_ORDER],
+        [AnalystType.MARKET, AnalystType.SOCIAL, AnalystType.NEWS, AnalystType.FUNDAMENTALS],
         asset_type,
     )
     
