@@ -1299,6 +1299,32 @@ def execute_analysis_flow(selections: dict, checkpoint: bool = False, auto_save:
         update_display(layout, stats_handler=stats_handler, start_time=start_time)
 
     console.print("\n[bold cyan]Analysis Complete![/bold cyan]\n")
+    
+    provider_lower = selections['llm_provider'].lower()
+    thinking_str = ""
+    if provider_lower == "google":
+        thinking_level = selections.get("google_thinking_level")
+        thinking_map = {
+            "high": "Deep Thinking",
+            "minimal": "Minimal/Disable Thinking"
+        }
+        thinking_display = thinking_map.get(thinking_level, "Default")
+        thinking_str = f" | [bold]Thinking Mode:[/bold] {thinking_display}"
+    elif provider_lower == "openai":
+        reasoning_effort = selections.get("openai_reasoning_effort") or "Default"
+        thinking_str = f" | [bold]Reasoning Effort:[/bold] {reasoning_effort.title()}"
+    elif provider_lower == "anthropic":
+        anthropic_effort = selections.get("anthropic_effort") or "Default"
+        thinking_str = f" | [bold]Effort Level:[/bold] {anthropic_effort.title()}"
+
+    summary_line = (
+        f"[bold]Ticker:[/bold] {selections['ticker']} | "
+        f"[bold]Provider:[/bold] {selections['llm_provider'].upper()} | "
+        f"[bold]Quick Model:[/bold] {selections['shallow_thinker']} | "
+        f"[bold]Deep Model:[/bold] {selections['deep_thinker']}"
+        f"{thinking_str}"
+    )
+    console.print(summary_line)
     console.print(f"[dim]{analyst_wall_time_tracker.format_summary()}[/dim]")
 
     save_report = False
