@@ -1022,6 +1022,9 @@ def get_default_selections(ticker: str) -> dict:
         "shallow_thinker": quick_thinker,
         "deep_thinker": deep_thinker,
         "asset_type": asset_type,
+        "google_thinking_level": DEFAULT_CONFIG.get("google_thinking_level"),
+        "openai_reasoning_effort": DEFAULT_CONFIG.get("openai_reasoning_effort"),
+        "anthropic_effort": DEFAULT_CONFIG.get("anthropic_effort"),
     }
 
 
@@ -1114,6 +1117,17 @@ def execute_analysis_flow(selections: dict, checkpoint: bool = False, auto_save:
     config_summary += f"[bold]Research Depth:[/bold] {selections['research_depth']} round(s)\n"
     config_summary += f"[bold]Output Language:[/bold] {selections['output_language']}"
     
+    provider_lower = selections['llm_provider'].lower()
+    if provider_lower == "google":
+        thinking_level = selections.get("google_thinking_level") or "Default"
+        config_summary += f"\n[bold]Gemini Thinking Mode:[/bold] {thinking_level.title()}"
+    elif provider_lower == "openai":
+        reasoning_effort = selections.get("openai_reasoning_effort") or "Default"
+        config_summary += f"\n[bold]OpenAI Reasoning Effort:[/bold] {reasoning_effort.title()}"
+    elif provider_lower == "anthropic":
+        anthropic_effort = selections.get("anthropic_effort") or "Default"
+        config_summary += f"\n[bold]Claude Effort Level:[/bold] {anthropic_effort.title()}"
+    
     config_box = Panel(
         config_summary,
         border_style="magenta",
@@ -1137,6 +1151,16 @@ def execute_analysis_flow(selections: dict, checkpoint: bool = False, auto_save:
         message_buffer.add_message("System", f"Quick Model: {selections['shallow_thinker']}")
         message_buffer.add_message("System", f"Deep Model: {selections['deep_thinker']}")
         message_buffer.add_message("System", f"Research Depth: {selections['research_depth']} rounds")
+        
+        if provider_lower == "google":
+            thinking_level = selections.get("google_thinking_level") or "Default"
+            message_buffer.add_message("System", f"Gemini Thinking Mode: {thinking_level.title()}")
+        elif provider_lower == "openai":
+            reasoning_effort = selections.get("openai_reasoning_effort") or "Default"
+            message_buffer.add_message("System", f"OpenAI Reasoning: {reasoning_effort.title()}")
+        elif provider_lower == "anthropic":
+            anthropic_effort = selections.get("anthropic_effort") or "Default"
+            message_buffer.add_message("System", f"Claude Effort Level: {anthropic_effort.title()}")
         update_display(layout, stats_handler=stats_handler, start_time=start_time)
 
         first_analyst = get_initial_analyst_node(analyst_execution_plan)
