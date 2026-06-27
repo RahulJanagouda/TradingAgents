@@ -164,12 +164,21 @@ cp .env.example .env
 
 ### CLI Usage
 
-Launch the interactive CLI:
+#### Interactive Mode
+Launch the interactive CLI to select tickers, dates, LLMs, and analysis depth using a visual interface:
 ```bash
 tradingagents          # installed command
 python -m cli.main     # alternative: run directly from source
 ```
 You will see a screen where you can select your desired tickers, analysis date, LLM provider, research depth, and more.
+
+#### Batch / Direct Mode
+To analyze specific tickers directly from the command line without interactive prompts, pass them as arguments (comma-separated for multiple tickers):
+```bash
+tradingagents SOXX
+tradingagents NVDA,SPY --checkpoint
+python -m cli.main SOXX
+```
 
 <p align="center">
   <img src="assets/cli/cli_init.png" width="100%" style="display: inline-block; margin: 0 2%;">
